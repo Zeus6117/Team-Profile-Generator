@@ -9,6 +9,8 @@ const { writeFile } = require("./src/template");
 // Grants access to the file system functionality
 const fs = require("fs");
 
+const { number } = require("yargs");
+
 // TODO: Create an array of questions for user input
 const promptUser = () => {
   return inquirer.prompt([
@@ -33,16 +35,14 @@ const promptUser = () => {
     {
       type: "input",
       name: "manager.id",
-      message: "What is the manager's employee ID?",
+      message: "Please enter a manager's I.D. number.",
 
       // Validation
-      validate: (nameInput) => {
-        if (nameInput) {
+      validate: (answer) => {
+        if (isNaN(answer) || !answer)  {
+         return "Please delete your entry with the backspace key and try again with a valid manager's I.D. number";
+        } 
           return true;
-        } else {
-          console.log("Please enter the manager's employee ID!");
-          return false;
-        }
       },
     },
 
@@ -65,22 +65,43 @@ const promptUser = () => {
 
     // Question #4 - Manager Office Number
     {
-      type: "number",
+      type: "input",
+      message: "Please enter the manager's office number:",
       name: "manager.office",
-      message: "What is the office number for the manager?",
 
       // Validation
-      validate: (nameInput) => {
-        if (nameInput) {
-          return true;
-        } else {
-          console.log("Please enter the manager's office number!");
-          return false;
+      validate: (answer) => {
+        if (isNaN(answer) || !answer) {
+          return "Please delete your entry with the backspace key and try again";
         }
+        return true;
       },
     },
 
     // Question #5 - Finish or Add an Engineer/Intern
+    {
+        type: "list",
+        name: "next.steps",
+        message: "What do you want to do now?",
+        choices: ["Done with my team", "Add an Intern", "Add an Engineer"],
+  
+        // Validation
+        validate: (answer) => {
+          if (answer === "Done with my team") {
+            // Generate the file
+            promptUser().then((data) => {
+              console.log("Generating a file....");
+              console.log("Done! Check index.html under the dist folder.");
+              return writeFile(data);
+            });
+          } else if (answer === "Add an Intern") {
+            return console.log("You selected to add an intern!"); // Add logic to proceed with the intern questions
+          } else if (answer === "Add an Engineer") {
+            return console.log("You selected to add an engineer!");
+            // Add logic to proceed with engineer questions
+          }
+        },
+      },
   ]);
 };
 
